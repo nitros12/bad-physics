@@ -69,7 +69,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         var xComponent = (pos.x - p2.getX()) / dist * force;
         var yComponent = (pos.y - p2.getY()) / dist * force;
 
-        return new Vec2((float)xComponent, (float)yComponent);
+        return new Vec2((float)-xComponent, (float)-yComponent);
     }
 
     /**

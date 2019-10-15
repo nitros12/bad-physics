@@ -22,6 +22,10 @@ public class Planet implements MutVelocity, MutPosition, HasMass {
         this.mass = mass;
     }
 
+    float getDiameter() {
+        return (float) Math.min(Math.sqrt(mass / 100), 5);
+    }
+
     /**
      * @param worldW width of the world
      * @param worldH height of the world

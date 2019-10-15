@@ -15,10 +15,9 @@ public class SolarSystem extends JFrame
 {
 	private int width = 300;
 	private int height = 300;
-	private boolean exiting = false;
 
 	@Nonnull
-	private ArrayList<SolarObject> things = new ArrayList<SolarObject>();
+	private ArrayList<SolarObject> things = new ArrayList<>();
 
 	/**
 	 * Create a view of the Solar System.
@@ -53,18 +52,13 @@ public class SolarSystem extends JFrame
 
 		synchronized (this)
 		{
-			if (!this.exiting)
+			g.clearRect(0,0, this.width, this.height);
+			for(SolarObject t : this.things)
 			{
-				g.clearRect(0,0, this.width, this.height);
-				for(SolarObject t : this.things)
-				{
-					g.setColor(t.col);
-					g.fillOval(t.x, t.y, t.diameter, t.diameter);
-
-					//try{ Thread.sleep(0); } catch (Exception e) {} 
-				}
+				g.setColor(t.col);
+				g.fillOval(t.x, t.y, t.diameter, t.diameter);
 			}
-			
+
 			gr.drawImage(i, 0, 0, this);
 		}
 	}
@@ -102,97 +96,22 @@ public class SolarSystem extends JFrame
 	 * The SolarSystem class uses <i>Polar Co-ordinates</i> to represent the location
 	 * of objects in the solar system.
 	 *
-	 * @param distance the distance from the sun to the object.
-	 * @param angle the angle (in degrees) that represents how far the planet is around its orbit of the sun.
 	 * @param diameter the size of the object.
 	 * @param col the colour of this object, as a string. Case insentive. <p>One of: BLACK, BLUE, CYAN, DARK_GRAY, GRAY, GREEN, LIGHT_GRAY, 
 	 * MAGENTA, ORANGE, PINK, RED, WHITE, YELLOW. Alternatively, a 24 bit hexadecimal string representation of an RGB colour is also accepted, e.g. "#FF0000"</p>
 	 */
-	public void drawSolarObject(double distance, double angle, double diameter, @Nonnull String col)
+	public void drawSolarObject(double x, double y, double diameter, @Nonnull String col)
 	{
 		Color colour = this.getColourFromString(col);
 		double centreOfRotationX = ((double) this.width) / 2.0;
 		double centreOfRotationY = ((double) this.height) / 2.0;
 
-		double rads = Math.toRadians(angle);
-		double x = (int) (centreOfRotationX + distance * Math.sin(rads)) - diameter / 2;
-		double y = (int) (centreOfRotationY + distance * Math.cos(rads)) - diameter / 2;
+		System.out.println("drawing at x:" + x + ", y: " + y + ", diam: " + diameter);
 
 		synchronized (this)
 		{
-			if (this.things.size() > 1000)
-			{
-				System.out.println("\n\n");
-				System.out.println(" ********************************************************* ");
-				System.out.println(" ***** Only 1000 Entities Supported per Solar System ***** ");
-				System.out.println(" ********************************************************* ");
-				System.out.println("\n\n");
-				System.out.println("If you are't trying to add this many things");
-				System.out.println("to your SolarSystem, then you have probably");
-				System.out.println("forgotten to call the finishedDrawing() method");
-				System.out.println("See the JavaDOC documentation for more information");
-				System.out.println("\n-- Joe");
-				System.out.println("\n\n");
-
-				this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-			}
-			else
-			{
-				SolarObject t = new SolarObject((int) x, (int) y, (int) diameter, colour);
-				this.things.add(t);
-			}
-		}
-	}
-
-	/**
-	 * Draws a round shape in the window at the given co-ordinates. 
-	 * The SolarSystem class uses <i>Polar Co-ordinates</i> to represent the location
-	 * of objects in the solar system. This method operates in the same fashion as drawSolarObject, but
-	 * provides additional co-ordinates to allow the programmer to use an arbitrary point about which
-	 * the object orbits (e.g. a planet rather than the sun).
-	 *
-	 * @param distance the distance from this object to the point about which it is orbiting.
-	 * @param angle the angle (in degrees) that represents how far the object is around its orbit.
-	 * @param diameter the size of the object.
-	 * @param col the colour of this object, as a string. Case insentive. <p>One of: BLACK, BLUE, CYAN, DARK_GRAY, GRAY, GREEN, LIGHT_GRAY, 
-	 * MAGENTA, ORANGE, PINK, RED, WHITE, YELLOW</p>
-	 * @param centreOfRotationDistance the distance part of the polar co-ordinate about which this object orbits.
-	 * @param centreOfRotationAngle the angular part of the polar co-ordinate about which this object orbits.
-	 */
-	public void drawSolarObjectAbout(double distance, double angle, double diameter, @Nonnull String col, double centreOfRotationDistance, double centreOfRotationAngle)
-	{
-		Color colour = this.getColourFromString(col);
-		double centrerads = Math.toRadians(centreOfRotationAngle);
-		double centreOfRotationX = (((double) this.width) / 2.0) + centreOfRotationDistance * Math.sin(centrerads);
-		double centreOfRotationY = (((double) this.height) / 2.0) + centreOfRotationDistance * Math.cos(centrerads);
-
-		double rads = Math.toRadians(angle);
-		double x = (int) (centreOfRotationX + distance * Math.sin(rads)) - diameter / 2;
-		double y = (int) (centreOfRotationY + distance * Math.cos(rads)) - diameter / 2;
-
-		synchronized (this)
-		{
-			if (this.things.size() > 1000)
-			{
-				System.out.println("\n\n");
-				System.out.println(" ********************************************************* ");
-				System.out.println(" ***** Only 1000 Entities Supported per Solar System ***** ");
-				System.out.println(" ********************************************************* ");
-				System.out.println("\n\n");
-				System.out.println("If you are't trying to add this many things");
-				System.out.println("to your SolarSystem, then you have probably");
-				System.out.println("forgotten to call the finishedDrawing() method");
-				System.out.println("See the JavaDOC documentation for more information");
-				System.out.println("\n-- Joe");
-				System.out.println("\n\n");
-
-				this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-			}
-			else
-			{
-				SolarObject t = new SolarObject((int) x, (int) y, (int) diameter, colour);
-				this.things.add(t);
-			}
+			SolarObject t = new SolarObject((int) x, (int) y, (int) diameter, colour);
+			this.things.add(t);
 		}
 	}
 
@@ -203,16 +122,11 @@ public class SolarSystem extends JFrame
 	 */
 	public void finishedDrawing()
 	{
-		try
+		this.repaint();
+		synchronized (this)
 		{
-			this.repaint();
-			Thread.sleep(10);
-			synchronized (this)
-			{
-				this.things.clear();
-			}
+			this.things.clear();
 		}
-		catch (Exception e) { }
 	}
 	
 	private static class SolarObject
