@@ -1,4 +1,4 @@
-package somephysicsthing.solarsystem.quadtree;
+package somephysicsthing.solarsystem.bounded;
 
 import somephysicsthing.solarsystem.Vec2;
 

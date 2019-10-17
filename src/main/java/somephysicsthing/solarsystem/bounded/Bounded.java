@@ -1,4 +1,4 @@
-package somephysicsthing.solarsystem.quadtree;
+package somephysicsthing.solarsystem.bounded;
 
 import somephysicsthing.solarsystem.Vec2;
 
@@ -93,6 +93,22 @@ public interface Bounded {
         return new Rectangle(
                 new Vec2(this.getX() + this.getW() / 4.0f, this.getY()),
                 this.getW() / 2.0f, this.getH()
+        );
+    }
+
+    /**
+     * Scale a point between two regions
+     * @param other region to scale to
+     * @param point point to scale between
+     */
+    @Nonnull default Vec2 scaleBetween(Bounded other, Vec2 point) {
+        var normCoords = point.sub(this.getPos());
+        var wScale = other.getW() / this.getW();
+        var hScale = other.getH() / this.getH();
+
+        return new Vec2(
+                (normCoords.x * wScale) + other.getX(),
+                (normCoords.y * hScale) + other.getY()
         );
     }
 }
