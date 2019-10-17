@@ -8,4 +8,12 @@ class Tuple2<T, U> {
         this.left = left;
         this.right = right;
     }
+
+    @Override
+    public String toString() {
+        return "Tuple2{" +
+                "left=" + left +
+                ", right=" + right +
+                '}';
+    }
 }

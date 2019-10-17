@@ -13,30 +13,30 @@ public class Vec2 {
         this.y = y;
     }
 
-    @Nonnull Vec2 scale(float by) {
+    @Nonnull public Vec2 scale(float by) {
         return new Vec2(this.x * by, this.y * by);
     }
 
-    @Nonnull Vec2 add(@Nonnull Vec2 other) {
+    @Nonnull public Vec2 add(@Nonnull Vec2 other) {
         return new Vec2(this.x + other.x, this.y + other.y);
     }
 
-    @Nonnull Vec2 sub(@Nonnull Vec2 other) {
+    @Nonnull public Vec2 sub(@Nonnull Vec2 other) {
         return new Vec2(this.x - other.x, this.y - other.y);
     }
 
-    float abs() {
+    public float abs() {
         return (float) Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
-    float absSquared() {
+    public float absSquared() {
         return this.x * this.x + this.y * this.y;
     }
 
     /**
      * @return the vector representing the direction of the vector.
      */
-    @Nonnull Vec2 direction() {
+    @Nonnull public Vec2 direction() {
         var phi = Math.atan2(this.x, this.y);
 
         return new Vec2((float) Math.cos(phi), (float) Math.sin(phi));

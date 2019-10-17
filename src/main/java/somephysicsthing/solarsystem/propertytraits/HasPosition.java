@@ -1,8 +1,8 @@
 package somephysicsthing.solarsystem.propertytraits;
 
 import somephysicsthing.solarsystem.Vec2;
-import somephysicsthing.solarsystem.quadtree.Bounded;
-import somephysicsthing.solarsystem.quadtree.Rectangle;
+import somephysicsthing.solarsystem.bounded.Bounded;
+import somephysicsthing.solarsystem.bounded.Rectangle;
 
 import javax.annotation.Nonnull;
 

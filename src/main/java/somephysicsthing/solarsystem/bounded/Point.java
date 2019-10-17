@@ -1,10 +1,10 @@
-package somephysicsthing.solarsystem.quadtree;
+package somephysicsthing.solarsystem.bounded;
 
 import somephysicsthing.solarsystem.Vec2;
 
 import javax.annotation.Nonnull;
 
-class Point implements Bounded {
+public class Point implements Bounded {
     @Nonnull
     private final Vec2 pos;
 

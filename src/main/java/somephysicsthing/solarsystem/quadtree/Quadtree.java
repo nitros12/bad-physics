@@ -1,6 +1,8 @@
 package somephysicsthing.solarsystem.quadtree;
 
 import somephysicsthing.solarsystem.Vec2;
+import somephysicsthing.solarsystem.bounded.Bounded;
+import somephysicsthing.solarsystem.bounded.Rectangle;
 import somephysicsthing.solarsystem.propertytraits.HasPosition;
 
 import javax.annotation.Nonnull;
@@ -37,18 +39,31 @@ public class Quadtree<T extends HasPosition> {
     }
 
     /**
-     * Get a map of paths to regions that fit a predicate.
+     * Get a map of paths to regions in the quad tree
+     * @return a map of paths to regions in the quad tree
+     */
+    public HashMap<List<Direction>, Bounded> getRegions() {
+        var map = new HashMap<List<Direction>, Bounded>();
+        var path = new Stack<Direction>();
+
+        this.inner.getRegions(map, path);
+
+        return map;
+    }
+
+    /**
+     * Get a set of paths to regions that fit a predicate.
      * @param pred predicate function to test when we should stop traversing bounds
      * @return map of paths to regions that fit a predicate.
      */
     @Nonnull
-    public HashSet<List<Direction>> getRegionsFitting(Function<Bounded, Boolean> pred) {
-        var map = new HashSet<List<Direction>>();
+    public HashSet<List<Direction>> getPathsFitting(Function<Bounded, Boolean> pred) {
+        var set = new HashSet<List<Direction>>();
         var path = new Stack<Direction>();
 
-        this.inner.getRegionsFitting(pred, map, path);
+        this.inner.getPathsFitting(pred, set, path);
 
-        return map;
+        return set;
     }
 
     private interface Quadrant<T> {
@@ -56,7 +71,8 @@ public class Quadtree<T extends HasPosition> {
         @Nonnull Quadrant<T> insert(T p);
 
         <R> R applyFold(QuadtreeFolder<T, R> folder, Stack<Direction> pathSoFar);
-        void getRegionsFitting(Function<Bounded, Boolean> pred, HashSet<List<Direction>> collector, Stack<Direction> pathSoFar);
+        void getRegions(HashMap<List<Direction>, Bounded> collector, Stack<Direction> pathSoFar);
+        void getPathsFitting(Function<Bounded, Boolean> pred, HashSet<List<Direction>> collector, Stack<Direction> pathSoFar);
 
         /**
          * Get the direction to go to get to `where`
@@ -141,26 +157,48 @@ public class Quadtree<T extends HasPosition> {
         }
 
         @Override
-        public void getRegionsFitting(@Nonnull Function<Bounded, Boolean> pred, @Nonnull HashSet<List<Direction>> collector, @Nonnull Stack<Direction> pathSoFar) {
+        public void getRegions(HashMap<List<Direction>, Bounded> collector, Stack<Direction> pathSoFar) {
+            collector.put(List.copyOf(pathSoFar), this.bounds);
+
+            pathSoFar.push(Direction.NW);
+            this.nw.getRegions(collector, pathSoFar);
+            pathSoFar.pop();
+
+            pathSoFar.push(Direction.NE);
+            this.ne.getRegions(collector, pathSoFar);
+            pathSoFar.pop();
+
+            pathSoFar.push(Direction.SW);
+            this.sw.getRegions(collector, pathSoFar);
+            pathSoFar.pop();
+
+            pathSoFar.push(Direction.SE);
+            this.se.getRegions(collector, pathSoFar);
+            pathSoFar.pop();
+        }
+
+        @Override
+        public void getPathsFitting(@Nonnull Function<Bounded, Boolean> pred, @Nonnull HashSet<List<Direction>> collector, @Nonnull Stack<Direction> pathSoFar) {
             if (!pred.apply(this.bounds)) {
+                // ofc only add to the list if not adding any children
                 collector.add(List.copyOf(pathSoFar));
                 return;
             }
 
             pathSoFar.push(Direction.NW);
-            this.nw.getRegionsFitting(pred, collector, pathSoFar);
+            this.nw.getPathsFitting(pred, collector, pathSoFar);
             pathSoFar.pop();
 
             pathSoFar.push(Direction.NE);
-            this.ne.getRegionsFitting(pred, collector, pathSoFar);
+            this.ne.getPathsFitting(pred, collector, pathSoFar);
             pathSoFar.pop();
 
             pathSoFar.push(Direction.SW);
-            this.sw.getRegionsFitting(pred, collector, pathSoFar);
+            this.sw.getPathsFitting(pred, collector, pathSoFar);
             pathSoFar.pop();
 
             pathSoFar.push(Direction.SE);
-            this.se.getRegionsFitting(pred, collector, pathSoFar);
+            this.se.getPathsFitting(pred, collector, pathSoFar);
             pathSoFar.pop();
         }
     }
@@ -211,7 +249,15 @@ public class Quadtree<T extends HasPosition> {
         }
 
         @Override
-        public void getRegionsFitting(Function<Bounded, Boolean> pred, @Nonnull HashSet<List<Direction>> collector, @Nonnull Stack<Direction> pathSoFar) {
+        public void getRegions(HashMap<List<Direction>, Bounded> collector, Stack<Direction> pathSoFar) {
+            collector.put(List.copyOf(pathSoFar), this.bounds);
+        }
+
+        @Override
+        public void getPathsFitting(Function<Bounded, Boolean> pred, @Nonnull HashSet<List<Direction>> collector, @Nonnull Stack<Direction> pathSoFar) {
+            if (this.elem == null)
+                return;
+
             collector.add(List.copyOf(pathSoFar));
         }
     }
