@@ -12,8 +12,8 @@ class Tuple2<T, U> {
     @Override
     public String toString() {
         return "Tuple2{" +
-                "left=" + left +
-                ", right=" + right +
+                "left=" + this.left +
+                ", right=" + this.right +
                 '}';
     }
 }

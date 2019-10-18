@@ -53,7 +53,7 @@ public class Quadtree<T extends HasPosition> {
 
     /**
      * Get a set of paths to regions that fit a predicate.
-     * @param pred predicate function to test when we should stop traversing bounds
+     * @param pred predicate function that returns true when we should stop traversing bounds
      * @return map of paths to regions that fit a predicate.
      */
     @Nonnull
@@ -179,7 +179,7 @@ public class Quadtree<T extends HasPosition> {
 
         @Override
         public void getPathsFitting(@Nonnull Function<Bounded, Boolean> pred, @Nonnull HashSet<List<Direction>> collector, @Nonnull Stack<Direction> pathSoFar) {
-            if (!pred.apply(this.bounds)) {
+            if (pred.apply(this.bounds)) {
                 // ofc only add to the list if not adding any children
                 collector.add(List.copyOf(pathSoFar));
                 return;

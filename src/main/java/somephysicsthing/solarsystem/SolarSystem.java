@@ -19,6 +19,9 @@ public class SolarSystem extends JFrame
 	@Nonnull
 	private ArrayList<SolarObject> things = new ArrayList<>();
 
+	@Nonnull
+	private ArrayList<Shape> moreThings = new ArrayList<>();
+
 	/**
 	 * Create a view of the Solar System.
 	 * Once an instance of the SolarSystem class is created,
@@ -52,11 +55,16 @@ public class SolarSystem extends JFrame
 
 		synchronized (this)
 		{
+		    g.setColor(this.getBackground());
 			g.clearRect(0,0, this.width, this.height);
 			for(SolarObject t : this.things)
 			{
 				g.setColor(t.col);
 				g.fillOval(t.x, t.y, t.diameter, t.diameter);
+			}
+
+			for (var s : this.moreThings) {
+				g.draw(s);
 			}
 
 			gr.drawImage(i, 0, 0, this);
@@ -103,15 +111,17 @@ public class SolarSystem extends JFrame
 	public void drawSolarObject(double x, double y, double diameter, @Nonnull String col)
 	{
 		Color colour = this.getColourFromString(col);
-		double centreOfRotationX = ((double) this.width) / 2.0;
-		double centreOfRotationY = ((double) this.height) / 2.0;
-
-		System.out.println("drawing at x:" + x + ", y: " + y + ", diam: " + diameter);
 
 		synchronized (this)
 		{
 			SolarObject t = new SolarObject((int) x, (int) y, (int) diameter, colour);
 			this.things.add(t);
+		}
+	}
+
+	public void drawExtra(Shape s) {
+		synchronized (this) {
+			this.moreThings.add(s);
 		}
 	}
 
@@ -123,9 +133,14 @@ public class SolarSystem extends JFrame
 	public void finishedDrawing()
 	{
 		this.repaint();
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException ignored) {
+		}
 		synchronized (this)
 		{
 			this.things.clear();
+			this.moreThings.clear();
 		}
 	}
 	
