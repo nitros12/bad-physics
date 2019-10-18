@@ -5,11 +5,13 @@ import somephysicsthing.solarsystem.propertytraits.*;
 import somephysicsthing.solarsystem.quadtree.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
     @Nonnull private final List<T> elems;
@@ -21,11 +23,11 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         this.elems = elems;
         this.width = width;
         this.height = height;
-        this.theta = 1.5f;
-        this.g = 6.67e-11f;
+        this.theta = 0.5f;
+        this.g = 1e-5f; // 6.67e-11f;
     }
 
-    public MassSimulation(@Nonnull List<T> elems, float width, float height, float theta, float g) {
+    MassSimulation(@Nonnull List<T> elems, float width, float height, float theta, float g) {
         this.elems = elems;
         this.width = width;
         this.height = height;
@@ -33,7 +35,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         this.g = g;
     }
 
-    void runSimulation(float ts) {
+    HashMap<List<Direction>, Bounded> runSimulation(float ts) {
         var tree = new Quadtree<T>(this.width, this.height);
 
         for (var elem : this.elems) {
@@ -61,26 +63,31 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
             elem.setPosition(newValues.left);
             elem.setVelocity(newValues.right);
         }
+
+        return tree.getRegions();
     }
 
     @Nonnull
-    private Vec2 calcAccellForPoint(@Nonnull Vec2 pos, float mass, @Nonnull MassyPoint p2) {
-        var dist = pos.sub(p2.pos).abs();
+    private Vec2 calcAccelForPoint(@Nonnull Vec2 pos, float mass, @Nonnull MassyPoint p2) {
+        var dist = p2.pos.sub(pos); // pos.sub(p2.pos);
 
-        var force = (this.g * mass * p2.mass) / Math.sqrt(dist);
+        var force = (float) (this.g * mass * p2.mass / Math.sqrt(dist.abs()));
 
-        var xComponent = ((pos.x - p2.getX()) / dist) * force;
-        var yComponent = ((pos.y - p2.getY()) / dist) * force;
-
-        return new Vec2((float)-xComponent, (float)-yComponent);
+        return dist.normal().scale(force);
     }
 
     @Nonnull
-    private Vec2 calcAccellInner(@Nonnull Vec2 pos, float mass, @Nonnull ArrayList<MassyPoint> points) {
-        return points.stream()
-                .map((p) -> this.calcAccellForPoint(pos, mass, p))
+    private Vec2 calcAccelInner(@Nonnull Vec2 pos, float mass, @Nonnull ArrayList<MassyPoint> points) {
+        var accel = points.stream()
+                .map((p) -> this.calcAccelForPoint(pos, mass, p))
                 .reduce(Vec2::add)
-                .orElse(new Vec2(0, 0));
+                .orElseGet(() -> new Vec2(0, 0));
+
+        if (Float.isNaN(accel.x) || Float.isNaN(accel.y)) {
+            return new Vec2(0, 0);
+        }
+
+        return accel;
     }
 
     /**
@@ -95,32 +102,47 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         var vel = p1.getVelocity();
         var mass = p1.getMass();
 
+        points = points.stream()
+                .filter((p) -> p.linkedElement != p1)
+                .collect(Collectors.toCollection(ArrayList::new));
+
         // perform runge kutta
-        var k1dx = this.calcAccellInner(pos, mass, points);
-        var k2dx = this.calcAccellInner(pos.add(vel).scale(ts / 2), mass, points);
+        var k1dx = this.calcAccelInner(pos, mass, points);
+        var k2dx = this.calcAccelInner(pos.add(vel).scale(ts / 2), mass, points);
         var k2x = vel.add(vel).scale(ts / 2);
-        var k3dx = this.calcAccellInner(pos.add(k2x).scale(ts / 2), mass, points);
+        var k3dx = this.calcAccelInner(pos.add(k2x).scale(ts / 2), mass, points);
         var k3x = vel.add(k2dx).scale(ts / 2);
-        var k4dx = this.calcAccellInner(pos.add(k3x).scale(ts), mass, points);
+        var k4dx = this.calcAccelInner(pos.add(k3x).scale(ts), mass, points);
         var k4x = vel.add(k3dx).scale(ts);
 
         var dx = vel.add(k1dx.add(k2dx.scale(2)).add(k3dx.scale(2)).add(k4dx).scale(ts / 6));
         var d =  pos.add(vel.add(k2x.scale(2)).add(k3x.scale(2)).add(k4x).scale(ts / 6));
 
-        // any were NaN, keep everything the same
-        if (Float.isNaN(dx.x) || Float.isNaN(dx.y) || Float.isNaN(d.x) || Float.isNaN(d.y))
-            return new Tuple2<>(pos.add(vel).scale(ts / 100), vel);
-
         return new Tuple2<>(d, dx);
     }
 
-    private static class MassyPoint implements HasPosition, HasMass {
+    private class MassyPoint implements HasPosition, HasMass {
         @Nonnull private final Vec2 pos;
         private final float mass;
 
-        MassyPoint(@Nonnull Vec2 pos, float mass) {
+        @Nullable final T linkedElement;
+
+        public MassyPoint(@Nonnull Vec2 pos, float mass) {
             this.pos = pos;
             this.mass = mass;
+            this.linkedElement = null;
+        }
+
+        /**
+         * represents either an object with mass or the centre of mass of set of objects
+         * @param pos position of the point
+         * @param mass mass of the point
+         * @param linkedElement if the massy point is linked to an element this is non null
+         */
+        MassyPoint(@Nonnull Vec2 pos, float mass, @Nullable T linkedElement) {
+            this.pos = pos;
+            this.mass = mass;
+            this.linkedElement = linkedElement;
         }
 
         @Nonnull
@@ -179,7 +201,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         @Nonnull
         @Override
         public MassyPoint visitLeaf(@Nonnull List<Direction> path, @Nonnull T elem) {
-            var massPoint = new MassyPoint(elem.getPosition(), elem.getMass());
+            var massPoint = new MassyPoint(elem.getPosition(), elem.getMass(), elem);
             this.centresOfMass.put(path, massPoint);
             return massPoint;
         }

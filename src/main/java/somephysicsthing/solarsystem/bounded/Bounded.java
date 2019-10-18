@@ -97,18 +97,20 @@ public interface Bounded {
     }
 
     /**
-     * Scale a point between two regions
-     * @param other region to scale to
-     * @param point point to scale between
+     * Scale a region from one to another
+     * @param target region to scale to
+     * @param b region to scale between
      */
-    @Nonnull default Vec2 scaleBetween(Bounded other, Vec2 point) {
-        var normCoords = point.sub(this.getPos());
-        var wScale = other.getW() / this.getW();
-        var hScale = other.getH() / this.getH();
+    @Nonnull default Bounded scaleBetween(Bounded target, Bounded b) {
+        var normCoords = b.getPos().sub(this.getPos());
+        var wScale = target.getW() / this.getW();
+        var hScale = target.getH() / this.getH();
 
-        return new Vec2(
-                (normCoords.x * wScale) + other.getX(),
-                (normCoords.y * hScale) + other.getY()
+        return new Rectangle(new Vec2(
+                (normCoords.x * wScale) + target.getX(),
+                (normCoords.y * hScale) + target.getY()),
+                b.getW() * wScale,
+                b.getH() * hScale
         );
     }
 }

@@ -26,20 +26,15 @@ public class Vec2 {
     }
 
     public float abs() {
-        return (float) Math.sqrt(this.x * this.x + this.y * this.y);
+        return (float) Math.sqrt(this.absSquared());
     }
 
     public float absSquared() {
         return this.x * this.x + this.y * this.y;
     }
 
-    /**
-     * @return the vector representing the direction of the vector.
-     */
-    @Nonnull public Vec2 direction() {
-        var phi = Math.atan2(this.x, this.y);
-
-        return new Vec2((float) Math.cos(phi), (float) Math.sin(phi));
+    @Nonnull public Vec2 normal() {
+        return this.scale(1.0f / this.abs());
     }
 
     @Nonnull
