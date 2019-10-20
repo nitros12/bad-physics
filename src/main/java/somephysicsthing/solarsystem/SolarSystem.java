@@ -57,15 +57,18 @@ public class SolarSystem extends JFrame
 		{
 		    g.setColor(this.getBackground());
 			g.clearRect(0,0, this.width, this.height);
+
+			for (var s : this.moreThings) {
+				g.setColor(new Color(0x003300));
+				g.draw(s);
+			}
+
 			for(SolarObject t : this.things)
 			{
 				g.setColor(t.col);
 				g.fillOval(t.x, t.y, t.diameter, t.diameter);
 			}
 
-			for (var s : this.moreThings) {
-				g.draw(s);
-			}
 
 			gr.drawImage(i, 0, 0, this);
 		}

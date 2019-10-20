@@ -12,6 +12,10 @@ public class Point implements Bounded {
         this.pos = pos;
     }
 
+    public Point(double x, double y) {
+        this.pos = new Vec2(x, y);
+    }
+
     @Nonnull
     @Override
     public Rectangle getRect() {

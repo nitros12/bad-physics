@@ -13,10 +13,10 @@ public class QuadtreeTest {
     @Test
     public void insert() {
         class TestPoint implements HasPosition {
-            private final float x, y;
-            private final float value;
+            private final double x, y;
+            private final double value;
 
-            private TestPoint(float x, float y, float value) {
+            private TestPoint(double x, double y, double value) {
                 this.x = x;
                 this.y = y;
                 this.value = value;
