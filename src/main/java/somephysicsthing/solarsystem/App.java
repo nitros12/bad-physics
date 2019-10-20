@@ -63,7 +63,7 @@ public class App {
     private App() {
         var planetGen = new PlanetGenerator();
 
-        this.planets = IntStream.rangeClosed(0, 500)
+        this.planets = IntStream.rangeClosed(0, 10000)
                 .mapToObj((_idx) -> planetGen.mkPlanet())
                 .collect(Collectors.toCollection(ArrayList::new));
 
@@ -100,13 +100,11 @@ public class App {
     }
 
     private void innerMain() throws InterruptedException {
-        Thread.sleep(10000);
-
         while (!this.planets.isEmpty()) {
             // remove planets that exceed the edge of the world
             this.planets.removeIf((Planet p) -> !p.isValid(this.arenaSize, this.arenaSize));
 
-            System.out.println(this.planets);
+            // System.out.println(this.planets);
 
             for (var planet : this.planets) {
                 this.drawPlanet(planet);

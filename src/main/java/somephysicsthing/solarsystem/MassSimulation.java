@@ -22,7 +22,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         this.elems = elems;
         this.width = width;
         this.height = height;
-        this.theta = 0.5;
+        this.theta = 1.0;
         // this.g = 6.67e-11;
         this.g = 1e-6f;
     }
@@ -44,25 +44,26 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
 
         HashMap<List<Direction>, MassyPoint> weights = (new CalculateWeights()).calculate(tree);
 
-        for (var elem : this.elems) {
-            var massesToUse = tree.getPathsFitting((Bounded region) -> {
-                var avgWidth = (region.getH() + region.getW()) / 2.0f;
-                var dist = region.getPos().sub(elem.getPosition()).abs();
+        this.elems.parallelStream()
+                .forEach(elem -> {
+                    var massesToUse = tree.getPathsFitting((Bounded region) -> {
+                        var avgWidth = (region.getH() + region.getW()) / 2.0f;
+                        var dist = region.getPos().sub(elem.getPosition()).abs();
 
-                return (avgWidth / dist) < this.theta;
-            });
+                        return (avgWidth / dist) < this.theta;
+                    });
 
-            var masses = massesToUse
-                    .stream()
-                    .map(weights::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toCollection(ArrayList::new));
+                    var masses = massesToUse
+                            .stream()
+                            .map(weights::get)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toCollection(ArrayList::new));
 
-            var newValues = this.calcValuesFromGravity(elem, masses, ts);
+                    var newValues = this.calcValuesFromGravity(elem, masses, ts);
 
-            elem.setPosition(newValues.left);
-            elem.setVelocity(newValues.right);
-        }
+                    elem.setPosition(newValues.left);
+                    elem.setVelocity(newValues.right);
+                });
 
         return tree.getRegions();
     }
