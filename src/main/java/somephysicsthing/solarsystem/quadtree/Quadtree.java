@@ -20,8 +20,8 @@ public class Quadtree<T extends HasPosition> {
     @Nonnull private Quadrant<T> inner;
     @Nonnull private Bounded bounds;
 
-    public Quadtree(float width, float height) {
-        this.bounds = new Rectangle(new Vec2(0, 0), width, height);
+    public Quadtree(double width, double height) {
+        this.bounds = new Rectangle(0, 0, width, height);
         this.inner = new LeafNode(this.bounds);
     }
 

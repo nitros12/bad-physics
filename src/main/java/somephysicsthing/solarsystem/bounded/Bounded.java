@@ -5,42 +5,57 @@ import somephysicsthing.solarsystem.Vec2;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
+/**
+ * Represents a region of 2d space, a position, a width, and a height
+ */
 public interface Bounded {
     @Nonnull default Vec2 getPos() {
         return this.getRect().pos;
     }
 
-    default float getX() {
+    default double getX() {
         return this.getRect().pos.x;
     }
 
-    default float getY() {
+    default double getY() {
         return this.getRect().pos.y;
     }
 
     @Nonnull Rectangle getRect();
 
-    @Nonnegative default float getW() {
+    @Nonnegative default double getW() {
         return this.getRect().w;
     }
 
-    @Nonnegative default float getH() {
+    @Nonnegative default double getH() {
         return this.getRect().h;
     }
 
-    default float top() {
+    /**
+     * @return y coordinate of the top edge of the region
+     */
+    default double top() {
         return (this.getY() + (this.getH() / 2.0f));
     }
 
-    default float bottom() {
+    /**
+     * @return y coordinate of the bottom edge of the region
+     */
+    default double bottom() {
         return (this.getY() - (this.getH() / 2.0f));
     }
 
-    default float left() {
+    /**
+     * @return x coordinate of the left edge of the region
+     */
+    default double left() {
         return (this.getX() - (this.getW() / 2.0f));
     }
 
-    default float right() {
+    /**
+     * @return x coordinate of the right edge of the region
+     */
+    default double right() {
         return (this.getX() + (this.getW() / 2.0f));
     }
 
