@@ -3,6 +3,8 @@ package somephysicsthing.solarsystem;
 import somephysicsthing.solarsystem.bounded.Bounded;
 import somephysicsthing.solarsystem.bounded.Point;
 import somephysicsthing.solarsystem.bounded.Rectangle;
+import somephysicsthing.solarsystem.rendering.CartesianSolarSystem;
+import somephysicsthing.solarsystem.rendering.SolarSystem;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -17,7 +19,7 @@ public class App {
     private double solarSystemSize = this.arenaSize / this.scaleFactor;
 
     private ArrayList<Planet> planets;
-    private SolarSystem solarSystem;
+    private CartesianSolarSystem solarSystem;
 
     private Bounded simulationArea = new Rectangle(0, 0,
             this.arenaSize, this.arenaSize
@@ -70,7 +72,7 @@ public class App {
         this.planets.add(new Planet(new Vec2(0, 1000), new Vec2(-500, 0), 1000000000.0f, "#00ffff"));
         this.planets.add(new Planet(new Vec2(0, -1000), new Vec2(500, 0), 1000000000.0f, "#00ff00"));
 
-        this.solarSystem = new SolarSystem((int) this.solarSystemSize, (int) this.solarSystemSize);
+        this.solarSystem = new CartesianSolarSystem((int) this.solarSystemSize, (int) this.solarSystemSize);
     }
 
     private void drawPlanet(Planet p) {
