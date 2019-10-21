@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
     @Nonnull private final List<T> elems;
@@ -22,7 +23,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         this.elems = elems;
         this.width = width;
         this.height = height;
-        this.theta = 1.0;
+        this.theta = 1.2;
         // this.g = 6.67e-11;
         this.g = 1e-6f;
     }
@@ -48,18 +49,17 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
                 .forEach(elem -> {
                     var massesToUse = tree.getPathsFitting((Bounded region) -> {
                         var avgWidth = (region.getH() + region.getW()) / 2.0f;
-                        var dist = region.getPos().sub(elem.getPosition()).abs();
+                        var dist = region.getPos().sub(elem.getPos()).abs();
 
                         return (avgWidth / dist) < this.theta;
                     });
 
-                    var masses = massesToUse
-                            .stream()
+                    var massesStream = massesToUse
+                            .parallelStream()
                             .map(weights::get)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toCollection(ArrayList::new));
+                            .filter(Objects::nonNull);
 
-                    var newValues = this.calcValuesFromGravity(elem, masses, ts);
+                    var newValues = this.calcValuesFromGravity(elem, massesStream, ts);
 
                     elem.setPosition(newValues.left);
                     elem.setVelocity(newValues.right);
@@ -85,7 +85,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
     private Vec2 calcAccelInner(@Nonnull Vec2 pos, double mass, @Nonnull ArrayList<MassyPoint> points) {
 
 
-        var accel = points.stream()
+        var accel = points.parallelStream()
                 .map((p) -> this.calcAccelForPoint(pos, mass, p))
                 .reduce(Vec2::add)
                 .orElseGet(() -> new Vec2(0, 0));
@@ -100,16 +100,16 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
     /**
      * calculate the new position and velocity for a particle
      * @param p1 the point to focus on for calculating force
-     * @param points the points affecting it
+     * @param pointsStream the points affecting it
      * @param ts the timestep
      * @return a 2-tuple of new pos, new velocity
      */
-    @Nonnull private Tuple2<Vec2, Vec2> calcValuesFromGravity(@Nonnull T p1, @Nonnull ArrayList<MassyPoint> points, double ts) {
-        var pos = p1.getPosition();
+    @Nonnull private Tuple2<Vec2, Vec2> calcValuesFromGravity(@Nonnull T p1, @Nonnull Stream<MassyPoint> pointsStream, double ts) {
+        var pos = p1.getPos();
         var vel = p1.getVelocity();
         var mass = p1.getMass();
 
-        points = points.stream()
+        var points = pointsStream
                 .filter((p) -> p.linkedElement != p1)
                 .collect(Collectors.toCollection(ArrayList::new));
 
@@ -154,7 +154,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
 
         @Nonnull
         @Override
-        public Vec2 getPosition() {
+        public Vec2 getPos() {
             return this.pos;
         }
 
@@ -208,7 +208,7 @@ public class MassSimulation<T extends MutPosition & MutVelocity & HasMass> {
         @Nonnull
         @Override
         public MassyPoint visitLeaf(@Nonnull List<Direction> path, @Nonnull T elem) {
-            var massPoint = new MassyPoint(elem.getPosition(), elem.getMass(), elem);
+            var massPoint = new MassyPoint(elem.getPos(), elem.getMass(), elem);
             this.centresOfMass.put(path, massPoint);
             return massPoint;
         }

@@ -8,11 +8,11 @@ import javax.annotation.Nonnull;
 
 public interface HasPosition extends Bounded {
     @Nonnull
-    Vec2 getPosition();
+    Vec2 getPos();
 
     @Nonnull
     @Override
     default Rectangle getRect() {
-        return new Rectangle(this.getPosition(),0, 0);
+        return new Rectangle(this.getPos(),0, 0);
     }
 }

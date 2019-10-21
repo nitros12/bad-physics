@@ -61,7 +61,7 @@ public class Planet implements MutVelocity, MutPosition, HasMass {
 
     @Nonnull
     @Override
-    public Vec2 getPosition() {
+    public Vec2 getPos() {
         return this.pos;
     }
 
