@@ -24,7 +24,7 @@ public class QuadtreeTest {
 
             @Nonnull
             @Override
-            public Vec2 getPosition() {
+            public Vec2 getPos() {
                 return new Vec2(this.x, this.y);
             }
         }
