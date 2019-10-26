@@ -19,6 +19,9 @@ javadoc {
     classpath = configurations.compile
 }
 
+applicationDefaultJvmArgs = ["-XX:MaxInlineLevel=30", "-XX:MaxRecursiveInlineLevel=4", "-XX:MaxInlineSize=400"]
+// applicationDefaultJvmArgs = ["-XX:+UnlockDiagnosticVMOptions", "-XX:+LogCompilation", "-XX:+TraceClassLoading", "-XX:+PrintAssembly", "-XX:+PrintNMethods", "-XX:+PrintNativeNMethods"]
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
